@@ -1,16 +1,135 @@
+%h1 Guides
+
 .sidenav
   %ul
-    %li= link_to "Installation", "#installation"
-    %li= link_to "Getting Started", "#getting-started"
+    %li= link_to "Dependencies", "#dependencies", id: "dependencies-link"
+    %li
+      = link_to "Installation", "#installation", id: "installation-link"
+      %ul
+        %li= link_to "Automatic Installation", "#automatic-installation"
+        %li= link_to "Manual Installation", "#manual-installation"
+    %li
+      = link_to "Getting Started", "#getting-started", id: "getting-started-link"
+      %ul
+        %li= link_to "Application Object", "#application-object"
+        %li= link_to "Controllers", "#controllers"
+
+    %li= link_to "Configuration", "#configuration", id: "configuration-link"
+    %li= link_to "Testing", "#getting-started", id: "getting-started-link"
 
 .content
-  %h1 Guides
+  %h2#dependencies Dependencies
+  %p RailsJskit requires <code>jquery</code> (or equivalent) and <code>lodash</code> (or equivalent). Require them in your <code>app/assets/javascripts/application.js</code> before <code>//= require rails_jskit</code>.
 
-  %h2#installation
-    Installation
-  %p
-    Add `rails_jskit` to your Gemfile
+  :code
+    # lang: js
+
+    // app/assets/javascripts/application.js
+    //= require lodash
+    //= require jquery
+
+  %h2#installation Installation
+  %p Add `rails_jskit` to your Gemfile:
 
   :code
     # lang: ruby
+
+    # Gemfile
     gem "rails_jskit"
+
+  %p Bundle it up
+
+  :code
+    # lang: sh
+
+    bundle install
+
+  %h3#automatic-installation Automatic Installation
+
+  %p RailsJskit comes with handy generators to get you started quickly. Use the generator to install jskit:
+
+  :code
+    # lang: sh
+
+    rails generate jskit:install
+
+  %p Or you can install it the good old-fashioned way, by hand:
+
+  %h3#manual-installation Manual Installation
+
+  %p Create a <code>app/assets/javascripts/controllers/</code> directory and add rails_jskit to <code>app/assets/javascripts/application.js</code>:
+
+  :code
+    # lang: js
+
+    // app/assets/javascripts/application.js
+    ...
+    //= require rails_jskit
+    //= require_tree ./controllers
+
+  %p Add <code>jskit</code> to your application layout:
+
+  :code
+    # lang: erb
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>JskitExample</title>
+      <%= stylesheet_link_tag 'application', media: 'all' %>
+      <%= csrf_meta_tags %>
+    </head>
+    <body>
+      <%= yield %>
+      <%= javascript_include_tag 'application' %>
+      <%= jskit %>
+    </body>
+    </html>
+
+
+  %p
+    %strong That's it!
+    You're ready to use RailsJskit.
+
+  %p Now all your controllers will be loaded at runtime but nothing will execute until events are dispatched.
+
+  %h2#getting-started Getting Started
+
+  %h3#application-object Application Object
+
+  %p RailsJskit will automatically create an JSkit application object for you, using the <code>app_namespace</code> as the global namespace <em>(defaults to "App")</em>. This global namespace provides you a way to interact with your JSkit application. You can #{link_to "configure", "#configuration"} this setting in your initializer <code>(config/initializers/rails_jskit.rb)</code>.
+
+  %h3#controllers Controllers
+
+  %p The basic component of JSkit is the Controller. Controllers allow you to coordinate javascript execution with your Rails controllers. For example, assuming you have a <code>PostsController</code> in <code>app/controllers/posts_controller.rb</code>. To execute javascript for that controller, create a corresponding JSkit controller in <code>app/assets/javascripts/controllers/posts_controller.js</code>.
+
+  :code
+    # lang: js
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      actions: ["index"]
+
+      index: function() {
+        // behavior for posts#index
+      }
+    });
+
+  %p Now whenever your <code>PostsController</code> renders the <code>index</code> action, the JSkit controller's index method will execute. It's that simple.
+  %h2#configuration Configuration
+
+  %p At this point, RailsJskit only has one setting, the <code>app_namespace</code>. If you're ok with the default namespace of "App", you don't need to change it. Otherwise create an initializer:
+
+  :code
+    # lang: ruby
+    # config/initializers/rails_jskit.rb
+    RailsJskit.configure do |config|
+      config.app_namespace = "MyApp"
+    end
+
+  %p Now you can refer to your application globally as <code>MyApp</code>.
+
+  :code
+    # lang: js
+    // app/assets/javascripts/controllers/application_controller.js
+    MyApp.createController("Posts", {...});

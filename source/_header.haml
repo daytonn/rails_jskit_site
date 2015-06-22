@@ -1,8 +1,9 @@
 .navigation-wrapper
-  %a.logo{:href => "javascript:void(0)"}
-    Rails JSKit
-  %a#js-mobile-menu.navigation-menu-button{:href => "javascript:void(0)"} MENU
-  %nav{:role => "navigation"}
+  %a.logo{ href: "/" }
+    = image_tag "logo-white.png"
+
+  %a#js-mobile-menu.navigation-menu-button{ href: "javascript:void(0)" } MENU
+  %nav{ role: "navigation" }
     %ul#js-navigation-menu.navigation-menu.show
       %li.nav-link
         = link_to "Home", "/"
@@ -16,10 +17,3 @@
         = link_to "Community", "javascript:void(0);"
       %li.nav-link
         = link_to "Blog", "javascript:void(0);"
-
-  .navigation-tools
-    .search-bar
-      %form{:role => "search"}
-        %input{:placeholder => "Enter Search", :type => "search"}/
-        %button{:type => "submit"}
-          %img{:alt => "Search Icon", :src => "https://raw.githubusercontent.com/thoughtbot/refills/master/source/images/search-icon.png"}

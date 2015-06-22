@@ -1,1 +1,62 @@
-About
+%h1 About
+
+%p Rails JSkit began as a collection of boilerplate code copied into new Rails applications. There were a few main goals of this boilerplate:
+
+%ul
+  %li Create a way to easily test-drive simple javascript features
+  %li Provide a data bridge from the Rails application to the javascripts with minimal coupling
+  %li Provide a way for the application.js file to be loaded at the bottom of the body, without having to create partials that render page-specific scripts
+
+%p Rails JSKit automatically triggers events for your Rails controllers, which JSKit controllers respond to. Given a JSKit controller with a corresponding name of a Rails controller, the JSKit controller will respond to it's events.
+
+:code
+  # lang: ruby
+  # app/controllers/posts_controller.rb
+  class PostsController < ApplicationController
+    def index
+      render :index
+    end
+  end
+
+:code
+  # lang: js
+  // app/assets/javascripts/controllers/posts_controller.js
+  App.createController("Posts", {
+    actions: ["index"],
+
+    index: function() {
+      alert("Posts index");
+    }
+  })
+
+%p JSKit controllers are plain ol' javscript objects which are easily tested,
+
+%p The JSkit event system allows the Rails application to load the application.js file at the end of the body tag. This way you avoid (mostly) the document ready problem by having all the markup rendered by the time the js is loaded.
+
+%p This allows you to write javascript for a specific controller, which will execute when your application is ready, only on that specific action or controller. Defining an Application controller allows you to execute code on every request. No more view-based javascript loading.
+
+%p Rails JSKit takes advantage of the event system to also send data from the server directly to a JSKit controller:
+
+:code
+  # lang: ruby
+  # app/controllers/posts_controller.rb
+  class PostsController < ApplicationController
+    def index
+      set_action_payload("Hello from Rails JSKit")
+      render :index
+    end
+  end
+
+:code
+  # lang: js
+  // app/assets/javascripts/controllers/posts_controller.js
+  App.createController("Posts", {
+    actions: ["index"],
+
+    index: function(message) {
+      alert(message);
+    }
+  });
+
+%p With the above code, "Hello from Rails JSKit" would pop up in alert.
+

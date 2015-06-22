@@ -17,22 +17,22 @@ h6 {
   font-size: $base-font-size;
   line-height: $heading-line-height;
   margin: 0 0 $small-spacing;
-  color: $blue1;
+  color: $heading-color;
 }
 
 p {
-  margin: 0 0 $small-spacing;
+  margin: 1em 0;
 }
 
 a {
-  color: $action-color;
+  color: $link-color;
   text-decoration: none;
   transition: color 0.1s linear;
 
   &:active,
   &:focus,
   &:hover {
-    color: darken($action-color, 15%);
+    color: $link-hover-color;
   }
 
   &:active,
