@@ -1,17 +1,15 @@
 .navigation-wrapper
-  = link_to "https://daytonn.github.io/rails_jskit", class: "logo" do
+  = link_to "/", class: "logo", relative: false do
     = image_tag "logo-white.png"
 
   %a#js-mobile-menu.navigation-menu-button{ href: "javascript:void(0)" } MENU
   %nav{ role: "navigation" }
     %ul#js-navigation-menu.navigation-menu.show
       %li.nav-link
-        = link_to "Home", "https://daytonn.github.io/rails_jskit"
+        = link_to "Home", "/", relative: false
       %li.nav-link
         = link_to "About", "/about.html"
       %li.nav-link
         = link_to "Documentation", "/documentation.html"
-      %li.nav-link
-        = link_to "API", "javascript:void(0);"
       %li.nav-link
         = link_to "Community", "https://github.com/daytonn/rails_jskit/issues"

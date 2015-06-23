@@ -154,7 +154,7 @@
 
   %h3#controllers Controllers
 
-  %p The basic component of JSkit is the Controller. Controllers allow you to coordinate javascript execution with your Rails controllers. For example, assuming you have a <code>PostsController</code> in <code>app/controllers/posts_controller.rb</code>.
+  %p The basic component of JSkit is the Controller. Controllers allow you to coordinate JavaScript execution with your Rails controllers. For example, assuming you have a <code>PostsController</code> in <code>app/controllers/posts_controller.rb</code>.
 
   :code
     #lang: ruby
@@ -168,7 +168,7 @@
 
   %h4#actions Actions
 
-  %p To define javascript for that controller, create a corresponding JSkit controller in <code>app/assets/javascripts/controllers/posts_controller.js</code> and define it's <code>actions</code>. The actions array tells JSkit which functions you want automatically wired to the controller's events. If you wish to run javascript on the <code>index</code> action of the <code>PostsController</code>, it would look something like this:
+  %p To define JavaScript for that controller, create a corresponding JSkit controller in <code>app/assets/javascripts/controllers/posts_controller.js</code> and define it's <code>actions</code>. The actions array tells JSkit which functions you want automatically wired to the controller's events. If you wish to run javascript on the <code>index</code> action of the <code>PostsController</code>, it would look something like this:
 
   :code
     #lang: js
@@ -209,7 +209,7 @@
 
   %p This will wire the three events <code>controllers:posts:edit</code>, <code>controllers:posts:create</code>, and <code>controllers:posts:upate</code> to the <code>setupForm</code> function.
 
-  %p This simple convention is flexible enough to accomplish any sane javascript task for a given action.
+  %p This simple convention is flexible enough to accomplish any sane JavaScript task for a given action.
 
   %p.note <em>Note: you can mix and match objects and strings within the actions array but it's probably best to define the string actions first and pass an object as the last item in the array. This is only for readability as JSkit does not care about the position of the actions in the array.</em>
 
@@ -229,7 +229,7 @@
 
   %h4#all-action The <code>all</code> action
 
-  %p There are times when you want a bit of javascript to run for every action of a given controller. In this case you can define an <code>all</code> method on the controller which will automatically be triggered on every action of the controller:
+  %p There are times when you want a bit of JavaScript to run for every action of a given controller. In this case you can define an <code>all</code> method on the controller which will automatically be triggered on every action of the controller:
 
   :code
     #lang: js
@@ -244,7 +244,7 @@
 
   %h4#application-controller Creating an Application Controller
 
-  %p In some cases, you may want some javascript to run on every single page of your application. Something like fading out flash notifications, or instantiating dynamic menus or something of that nature. In this case you can create an Application Controller at: <code>app/assets/javscripts/controllers/application_controller.js</code>
+  %p In some cases, you may want some JavaScript to run on every single page of your application. Something like fading out flash notifications, or instantiating dynamic menus or something of that nature. In this case you can create an Application Controller at: <code>app/assets/javscripts/controllers/application_controller.js</code>
 
   :code
     #lang: js
@@ -451,7 +451,7 @@
       }
     });
 
-  %p You may recognize this pattern from other frameworks. While JSkit aims to be a small, simple alternative to large frameworks, this is a simple way reduce some of the repetetive code in your everyday javascript. It's also tested in JSkit itself, so you don't need to test that the events were registered properly.
+  %p You may recognize this pattern from other frameworks. While JSkit aims to be a small, simple alternative to large frameworks, this is a simple way reduce some of the repetetive code in your everyday JavaScript. It's also tested in JSkit itself, so you don't need to test that the events were registered properly.
 
   %p.note <em>Note: if you are not doing anything else in an action but wiring elements and events, you can skip adding it to the <code>actions</code> array, and creating a function for that action.</em>
 
