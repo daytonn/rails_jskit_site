@@ -52,6 +52,7 @@ set :js_dir, "javascripts"
 set :images_dir, "images"
 set :haml, { ugly: true, format: :html5 }
 set :port, 3000
+set :relative_links, true
 activate :syntax
 
 # Build-specific configuration
@@ -59,5 +60,5 @@ configure :build do
   activate :minify_css
   activate :minify_javascript
   # activate :asset_hash
-  # activate :relative_assets
+  activate :relative_assets
 end
