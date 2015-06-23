@@ -1,0 +1,649 @@
+%h1 Guides
+
+.sidenav
+  %ul
+    %li= link_to "Dependencies", "#dependencies"
+    %li
+      = link_to "Installation", "#installation"
+      %ul
+        %li= link_to "Automatic Installation", "#automatic-installation"
+        %li= link_to "Manual Installation", "#manual-installation"
+    %li
+      = link_to "Documentation", "#getting-started"
+      %ul
+        %li
+          = link_to "Application Object", "#application-object"
+          %ul
+            %li= link_to "Dispatcher", "#dispatcher"
+            %li= link_to "Controllers Object", "#controllers-object"
+            %li= link_to "Controller Factories", "#controller-factories"
+        %li
+          = link_to "Controllers", "#controllers"
+          %ul
+            %li= link_to "Actions", "#actions"
+            %li= link_to "Mapped Actions", "#mapped-actions"
+            %li= link_to "The <code>all</code> Action", "#all-action"
+            %li= link_to "Creating an Application Controller", "#application-controller"
+            %li= link_to "Passing Data To Actions", "#passing-data"
+            %li= link_to "Elements", "#elements"
+            %li= link_to "Events", "#events"
+
+    %li= link_to "Configuration", "#configuration"
+    %li
+      = link_to "Testing", "#getting-started"
+      %ul
+        %li= link_to "Controller Factories", "#controller-factories"
+        %li= link_to "Testing Actions", "#testing-actions"
+        %li= link_to "Testing Elements", "#testing-elements"
+        %li= link_to "Testing Events", "#testing-events"
+
+.content
+  %h2#dependencies Dependencies
+  %p RailsJskit requires <code>jquery</code> (or equivalent) and <code>lodash</code> (or equivalent). Require them in your <code>app/assets/javascripts/application.js</code> before <code>//= require rails_jskit</code>.
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/application.js
+    //= require lodash
+    //= require jquery
+
+  %h2#installation Installation
+  %p Add `rails_jskit` to your Gemfile:
+
+  :code
+    #lang: ruby
+
+    # Gemfile
+    gem "rails_jskit"
+
+  %p Bundle it up
+
+  :code
+    #lang: sh
+
+    bundle install
+
+  %h3#automatic-installation Automatic Installation
+
+  %p RailsJskit comes with handy generators to get you started quickly. Use the generator to install jskit:
+
+  :code
+    #lang: sh
+
+    rails generate jskit:install
+
+  %p Or you can install it the good old-fashioned way, by hand:
+
+  %h3#manual-installation Manual Installation
+
+  %p Create a <code>app/assets/javascripts/controllers/</code> directory and add rails_jskit to <code>app/assets/javascripts/application.js</code>:
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/application.js
+    ...
+    //= require rails_jskit
+    //= require_tree ./controllers
+
+  %p Add <code>jskit</code> to your application layout:
+
+  :code
+    #lang: erb
+
+    # app/views/layouts/application.html.erb
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>JskitExample</title>
+      <%= stylesheet_link_tag 'application', media: 'all' %>
+      <%= csrf_meta_tags %>
+    </head>
+    <body>
+      <%= yield %>
+      <%= javascript_include_tag 'application' %>
+      <%= jskit %>
+    </body>
+    </html>
+
+
+  %p
+    %strong That's it!
+    You're ready to use RailsJskit.
+
+  %p Now all your controllers will be loaded at runtime but nothing will execute until events are dispatched.
+
+  %h2#getting-started Documentation
+
+  %h3#application-object Application Object
+
+  %p RailsJskit will automatically create a JSkit application object for you, using the configured <code>app_namespace</code> for the global variable name <em>(defaults to "App")</em>. This global namespace provides you a way to interact with your JSkit application. You can #{link_to "configure", "#configuration"} this setting in your initializer <code>(config/initializers/rails_jskit.rb)</code>.
+
+  %h4#dispatcher Dispatcher
+
+  %p Every JSkit application has a <code>Dispatcher</code> object. This object is responsible for registering and triggering events in your application. In general you don't interact directly with the application's Dispatcher, though it's important to know what it is and what it's doing. By default, every controller created by your application will have it's own reference to the Dispatcher object. A controller's actions will automatically be registered on the Dispatcher when it's created, so you shouldn't need to interact with the Dispatcher directly.
+
+  %h4#controllers-object Controllers Object
+
+  %p Every JSkit application also has a <code>Controllers</code> object that stores the Controllers instantiated by your application at runtime. Everytime you create a controller, an instance is created on the controllers object:
+
+  :code
+    #lang: ruby
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      ...
+    });
+
+    App.Controllers.Posts;// Instantiated Posts controller object
+
+  %h4#controller-factories Controller Factories
+
+  %p In addition to instances of each controller, the factory used to create the controller is stored on the application object itself. The factory is a function that will create a freshly initialized controller, useful in testing environments:
+
+  :code
+    #lang: ruby
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      ...
+    });
+
+    App.PostsController;// Factory function to create fresh Posts controller objects
+
+  %h3#controllers Controllers
+
+  %p The basic component of JSkit is the Controller. Controllers allow you to coordinate javascript execution with your Rails controllers. For example, assuming you have a <code>PostsController</code> in <code>app/controllers/posts_controller.rb</code>.
+
+  :code
+    #lang: ruby
+
+    # app/controllers/posts_controller.rb
+    class PostsController < ApplicationController
+      def index
+        render :index
+      end
+    end
+
+  %h4#actions Actions
+
+  %p To define javascript for that controller, create a corresponding JSkit controller in <code>app/assets/javascripts/controllers/posts_controller.js</code> and define it's <code>actions</code>. The actions array tells JSkit which functions you want automatically wired to the controller's events. If you wish to run javascript on the <code>index</code> action of the <code>PostsController</code>, it would look something like this:
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      actions: ["index"]
+
+      index: function() {
+        // behavior for posts#index
+      }
+    });
+
+
+  %p Now whenever your <code>PostsController</code> renders the <code>index</code> action, the JSkit controller's index method will execute. It's that simple.
+
+  %h4#mapped-actions Mapped Actions
+
+  %p You may find yourself wanting to wire up an action with a different function name than it's corresponding rails controlller, or you may want to assign the same function to multiple actions. This can be acheived by using a mapped action:
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      actions: [{
+        edit: "setupForm",
+        create: "setupForm",
+        update: "setupform"
+      }],
+
+      ...
+      setupForm: function() {
+        // form setup
+      }
+      ...
+    });
+
+  %p This will wire the three events <code>controllers:posts:edit</code>, <code>controllers:posts:create</code>, and <code>controllers:posts:upate</code> to the <code>setupForm</code> function.
+
+  %p This simple convention is flexible enough to accomplish any sane javascript task for a given action.
+
+  %p.note <em>Note: you can mix and match objects and strings within the actions array but it's probably best to define the string actions first and pass an object as the last item in the array. This is only for readability as JSkit does not care about the position of the actions in the array.</em>
+
+  :code
+    #lang: js
+
+    ...
+    actions: [
+      "index",
+      "show",
+      {
+        edit: "setupForm",
+        create: "setupForm",
+        update: "setupForm"
+      }
+    ]
+
+  %h4#all-action The <code>all</code> action
+
+  %p There are times when you want a bit of javascript to run for every action of a given controller. In this case you can define an <code>all</code> method on the controller which will automatically be triggered on every action of the controller:
+
+  :code
+    #lang: js
+
+    ...
+    all: function() {
+      console.log("Happens on every action");
+    }
+    ...
+
+  %p.note <em>Note: you don't have to add <code>all</code> to the actions array, JSkit knows what you mean.</em>
+
+  %h4#application-controller Creating an Application Controller
+
+  %p In some cases, you may want some javascript to run on every single page of your application. Something like fading out flash notifications, or instantiating dynamic menus or something of that nature. In this case you can create an Application Controller at: <code>app/assets/javscripts/controllers/application_controller.js</code>
+
+  :code
+    #lang: js
+
+    // app/assets/javscripts/controllers/application
+    App.createController("Application", {
+      all: function() {
+        setTimeout(function() {
+          $("#notifications").fadeOut();
+        }, 3000);
+
+        $("#menu").menuify();
+      }
+    });
+
+  %p There is nothing special about this controller except the fact that RailsJskit will trigger the <code>controller:application:all</code> event on every action of every controller. Which means that the <code>all</code> method will execute on every page.
+
+  %h4#passing-data Passing Data To Actions
+
+  %p Sometimes you may find yourself wanting to pass data from the Rails side of your application to the client side. The JSkit event system accounts for this and RailsJskit provides a simple interface to this functionality. JSkit has three payload methods, which are available to your application's controllers. The three methods correspond to the three levels of triggered events on any given page.
+
+  %ol
+    %li <code>set_app_payload</code> (sent with "controllers:application:all")
+    %li <code>set_controller_payload</code> (sent with "controllers:[controller name]:[action name]")
+    %li <code>set_action_payload</code> (sent with "controllers:[controller name][action name]")
+
+  %p Let's assume you want to pass devise's <code>current_user</code> object to the application controller. For this you would use <code>app_payload</code>
+
+  :code
+    #lang: ruby
+
+    # app/controllers/application_controller.rb
+    class ApplicationController < ActionController::Base
+      before_action :set_jskit_payload
+
+      private
+
+      def jskit_app_payload
+        set_app_payload(current_user)
+      end
+    end
+
+  %p This will pass the <code>current_user</code> as JSON in the <code>controllers:application:all</code> event:
+
+  :code
+    #lang: js
+
+    App.Dispatcher.trigger("controller:application:all", { email: "user@example.com", first_name: "John", last_name: "Smith"... });
+
+  %p Your application controller can make use of this data by assigning the argument to the action function:
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/controllers/application_controller.js
+    App.createController("Application", {
+      all: function(currentUser) {
+        App.currentUser = currentUser;// { email: "user@example.com", first_name: "John", last_name: "Smith"... }
+      }
+    });
+
+  %p These payload methods will take any number of arguments and pass them in order to the event handler. This allows for a simple but flexible way to pass data to your client-side application.
+
+  %p The <code>set_controller_payload</code> method and the <code>set_action_payload</code> work in the same way only they pass data to their specific events.
+
+  :code
+    #lang: ruby
+
+    # app/controllers/posts_controller.rb
+    class PostsController < ApplicationController
+      before_action :jskit_controller_payload
+
+      def index
+        set_action_payload("Data from the PostsController#index action")
+      end
+
+      private jskit_controller_payload
+
+      def jskit_controller_payload
+        set_controller_payload("Data from the PostsController")
+      end
+    end
+
+  %p This data can be accessed in the JSkit controller like so:
+
+  :code
+    #lang: js
+
+    // app/assets/javascript/controllers/posts_controller.js
+    App.createController("Posts", {
+      actions: ["index"],
+
+      all: function(message) {
+        console.log(message);// "Data from the PostsController"
+      },
+
+      index: function(message) {
+        console.log(message);// "Data from the PostsController#index action"
+      }
+    });
+
+  %h4#elements Elements
+
+  %p It's guaranteed you'll end up saving a reference to an <code>HTMLElement</code> wrapped in <code>jQuery</code> <em>(the proverbial jQuery burrito)</em>. You do this so often, it really helps to have a shorthand for doing so. Consider the following code:
+
+  :code
+    #lang: js
+
+    // app/assets/controllers/posts_controller.js
+    App.createController("Posts", {
+      actions: ["index"],
+
+      cacheElements: function() {
+        this.$postList = $("ul#posts");
+        this.$commentToggleLink = $("a.comment-toggle");
+        this.$modalWindow = $("#modal-window");
+        this.$modalCloseButton = $("#modal-window-close");
+      },
+
+      index: function() {
+        this.cacheElements();
+        // do stuff with elements
+      }
+    });
+
+  %p This is generally pretty clean code. It's easy to read and it's simple. The problem is that we're going to want to do the same thing in other actions. We can use the same <code>cacheElements</code> method but we may not need all the selectors.
+
+  %p If we do want to scope elements to actions, we'll need a way to scope the selected elements to specific actions. JSkit allows you to define this behavior with a simple <code>elements</code> object on the controller. Which looks something like this:
+
+  :code
+    #lang: js
+
+    // app/assets/controllers/posts_controller.js
+    App.createController("Posts", {
+      elements: {
+        index: {
+          postList: "ul#posts",
+          commentToggleLink: "a.comment-toggle",
+          modalWindow: "#modal-window",
+          modalCloseButton: "#modal-window-close"
+        }
+      },
+
+      index: function() {
+        // do stuff with elements
+      }
+    });
+
+  %p This keeps all the DOM selection one simple structure that cuts down on the clutter.
+
+  %p.note <em>Note: all keys under each action will be set as variables prefixed with the <code>$</code> to indicate that it's a <code>jQuery</code> wrapped set.</em> The above example would create three variables on the controller object when the <code>index</code> action is triggered:
+
+  :code
+    #lang: js
+
+    // app/assets/controllers/posts_controller.js
+    App.createController("Posts", {
+      elements: {
+        index: {
+          postList: "ul#posts",
+          commentToggleLink: "a.comment-toggle",
+          modalWindow: "#modal-window",
+          modalCloseButton: "#modal-window-close"
+        }
+      },
+
+      index: function() {
+        this.$postList;
+        this.$commentToggleLink;
+        this.$modalWindow;
+        this.$modalCloseButton;
+      }
+    });
+
+  %h4#events Events
+
+  %p Another common piece of boilerplate code is registering for events on <code>jQuery</code> wrapped elements. You know, the meat and potatoes of js development. JSkit has a novel way of tidying up event registration as well. An action's elements can be wired up to event handler functions (defined on the controller) in a similar fashion to selecting the elements, with the events object:
+
+  :code
+    #lang: js
+
+    // app/assets/controllers/posts_controller.js
+    App.createController("Posts", {
+      elements: {
+        index: {
+          launchModalButton: "#launch-modal",
+          modalCloseButton: "#modal-window-close"
+        }
+      },
+
+      events: {
+        index: {
+          launchModalButton: { click: "openModalWindow" },
+          modalCloseButton: { click: "closeModalWindow" }
+        }
+      },
+
+      openModalWindow: function() {
+        this.$modalWindow.removeClass("hidden");
+      },
+
+      closeModalWindow: function() {
+        this.$modalWindow.addClass("hidden");
+      }
+    });
+
+  %p You may recognize this pattern from other frameworks. While JSkit aims to be a small, simple alternative to large frameworks, this is a simple way reduce some of the repetetive code in your everyday javascript. It's also tested in JSkit itself, so you don't need to test that the events were registered properly.
+
+  %p.note <em>Note: if you are not doing anything else in an action but wiring elements and events, you can skip adding it to the <code>actions</code> array, and creating a function for that action.</em>
+
+  %h5#multiple-events Multiple Events
+
+  %p It is also possible to register multiple events on a given element, to do so simply add event keys to the event object for the given action:
+
+  :code
+    #lang: js
+
+    // app/assets/javscripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      elements: {
+        index: {
+          nameField: "input#name"
+        }
+      },
+
+      events: {
+        index: {
+          nameField: {
+            change: "handleNameFieldChange",
+            keyup: "handleNameFieldKeyup"
+          }
+        }
+      },
+
+      handleNameFieldChange: function(evnt) {
+        // handle name field change
+      },
+
+      handleNameFieldKeyup: function(evnt) {
+        // handle name field keyup
+      }
+    });
+
+  %h2#configuration Configuration
+
+  %p At this point, RailsJskit only has one setting, the <code>app_namespace</code>. If you're fine with the default namespace of "App", you don't need to change it. Otherwise create an initializer:
+
+  :code
+    #lang: ruby
+
+    # config/initializers/rails_jskit.rb
+    RailsJskit.configure do |config|
+      config.app_namespace = "MyApp"
+    end
+
+  %p Now you can refer to your application globally as <code>MyApp</code>.
+
+  :code
+    #lang: js
+
+    // app/assets/javascripts/controllers/application_controller.js
+    MyApp.createController("Posts", {...});
+
+  %h2#testing Testing
+
+  %p One of the main advantages of RailsJSkit is that it provides a simple structure that's easily tested. There are however, a few things you need to keep in mind while testing JSkit controllers.
+
+  %p When testing, it's important to use the #{link_to "Controller Factories", "#controller-factories"} to create your test subjects. This ensures that you always have a fresh version of the controller that has not been mutated by previous tests. A basic jasmine/mocha style JSkit controller test looks something like this:
+
+  :code
+    #lang: js
+
+    // spec/javscripts/controllers/posts_controller_spec.js
+    describe("PostsController", function() {
+      var subject;
+      beforeEach(function() {
+        subject = App.PostsController.create();// creates a fresh controller
+      });
+
+      describe("#index", function() {
+        it("has tests", function() {
+          expect(true).to.equal(true);
+        });
+      });
+    });
+
+  %h3#testing-actions Testing Actions
+
+  %p Testing actions is straight-forward, since they are just functions on your controller object, you can simply call them and test their behavior:
+
+  :code
+    #lang: js
+
+    // app/assets/javscripts/controller/posts_controller.js
+    App.createController("Posts", {
+      actions: ["index"],
+
+      elements: {
+        index: {
+          pageContainer: "#container",
+        }
+      },
+
+      index: function(color) {
+        this.color = color;
+        this.$pageContainer.css("background-color", this.color);
+      }
+    });
+
+  :code
+    #lang: js
+
+    // spec/javscripts/controllers/posts_controller_spec.js
+    describe("PostsController", function() {
+      var subject;
+      beforeEach(function() {
+        subject = App.PostsController.create();
+      });
+
+      describe("#index", function() {
+        it("sets the color variable with the given value", function() {
+          subject.index("#FF0000");
+          expect(subject.color).to.equal("#FF0000");
+        });
+
+        it("changes the page background color to the given color", function() {
+          subject.index("#FF0000");
+          expect(subject.$pageContainer.css("background-color")).to.equal("#FF0000");
+        });
+      });
+    });
+
+  %p Obviously this is a contrived example but you can see that testing an action is as simple as testing a function.
+
+  %h3#testing-elements Testing Elements
+
+  %p While you don't have to test the functionality of JSkit itself, you may want to assert that a certain action has access to a given element. To do this we can simply test the values in the elements object, without having to add fixtures to the test DOM:
+
+  :code
+    #lang: js
+
+    // spec/javscripts/controllers/posts_controller_spec.js
+    describe("PostsController", function() {
+      var subject;
+      beforeEach(function() {
+        subject = App.PostsController.create();
+      });
+
+      describe("#index", function() {
+        describe("elements", function() {
+          it("saves a reference to the #container element", function() {
+            expect(subject.elements.index.pageContainer).to.equal("#container");
+          });
+        });
+      });
+    });
+
+  %h3#testing-events Testing Events
+
+  %p Testing events is just as easy as testing elements, since they have a similar object:
+
+  :code
+    #lang: js
+
+    // app/assets/javscripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      elements: {
+        index: {
+          expandCommentsButton: "#expand-comments"
+        }
+      },
+
+      events: {
+        index: {
+          expandCommentsButton: {
+            click: "handleExpandCommentsClick"
+          }
+        }
+      },
+
+      handleExpandCommentsClick: function() {
+        ...
+      }
+    });
+  :code
+    #lang: js
+
+    // spec/javscripts/controllers/posts_controller_spec.js
+    describe("PostsController", function() {
+      var subject;
+      beforeEach(function() {
+        subject = App.PostsController.create();
+      });
+
+      describe("#index", function() {
+        describe("events", function() {
+          it("wires up `handleExpandCommentsClick` on click of the $expandCommentsButton", function() {
+            expect(subject.events.index.expandCommentsButton.click).to.equal("handleExpandCommentsClick");
+          });
+        });
+      });
+    });

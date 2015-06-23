@@ -65,13 +65,25 @@ body {
           }
 
           a {
-            padding-left: 1em;
+            padding-left: 1.5em;
 
             &.active,
             &:hover {
               // color: white;
               // background: lighten(#122b3b, 15%);
               background: desaturate($yellow, 20%);
+            }
+          }
+
+          ul {
+            border-top: solid 1px #fff;
+
+            li {
+              font-size: .75em;
+
+              a {
+                padding-left: 3.75em;
+              }
             }
           }
         }
@@ -154,4 +166,9 @@ body {
     list-style-type: disc;
     padding:  0 0 0 1em;
   }
+}
+
+.note {
+  background: $lightest-yellow;
+  padding: 1em;
 }
