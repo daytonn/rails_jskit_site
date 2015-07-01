@@ -421,7 +421,7 @@
 
   %h4#events Events
 
-  %p Another common piece of boilerplate code is registering for events on <code>jQuery</code> wrapped elements. You know, the meat and potatoes of js development. JSkit has a novel way of tidying up event registration as well. An action's elements can be wired up to event handler functions (defined on the controller) in a similar fashion to selecting the elements, with the events object:
+  %p Another common piece of boilerplate code is registering for events on <code>jQuery</code> wrapped elements. You know, the meat and potatoes of js development. JSkit has a novel way of tidying up event registration as well. An action's elements can be wired up to event handler functions (defined on the controller) by adding them to the element key's value as an array (tuple):
 
   :code
     #lang: js
@@ -430,15 +430,8 @@
     App.createController("Posts", {
       elements: {
         index: {
-          launchModalButton: "#launch-modal",
-          modalCloseButton: "#modal-window-close"
-        }
-      },
-
-      events: {
-        index: {
-          launchModalButton: { click: "openModalWindow" },
-          modalCloseButton: { click: "closeModalWindow" }
+          launchModalButton: ["#launch-modal", { click: "openModalWindow" }],
+          modalCloseButton: ["#modal-window-close", { click: "closeModalWindow" }]
         }
       },
 
@@ -451,9 +444,9 @@
       }
     });
 
-  %p You may recognize this pattern from other frameworks. While JSkit aims to be a small, simple alternative to large frameworks, this is a simple way reduce some of the repetetive code in your everyday JavaScript. It's also tested in JSkit itself, so you don't need to test that the events were registered properly.
+  %p This is a simple way reduce some of the repetetive code in your everyday JavaScript. It's also tested in JSkit itself, so you don't need to test that the events were registered properly.
 
-  %p.note <em>Note: if you are not doing anything else in an action but wiring elements and events, you can skip adding it to the <code>actions</code> array, and creating a function for that action.</em>
+  %p.note <em>Note: if you are not doing anything else in an action but wiring elements and events, you can skip adding the action to the <code>actions</code> array, and creating a function for that action.</em>
 
   %h5#multiple-events Multiple Events
 
@@ -466,16 +459,10 @@
     App.createController("Posts", {
       elements: {
         index: {
-          nameField: "input#name"
-        }
-      },
-
-      events: {
-        index: {
-          nameField: {
+          nameField: ["input#name", {
             change: "handleNameFieldChange",
             keyup: "handleNameFieldKeyup"
-          }
+          }]
         }
       },
 
