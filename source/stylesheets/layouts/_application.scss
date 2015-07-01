@@ -142,10 +142,12 @@ body {
   @include fill-parent;
   clear: left;
   margin-bottom: 4em;
+  padding: 0 1em;
 }
 
 .features {
   @include fill-parent;
+  @include clearfix;
   clear: both;
 
   h2 {
@@ -155,6 +157,7 @@ body {
 
   .why-jskit {
     @include span-columns(4);
+    padding-left: 1em;
   }
 
   .lightweight {
@@ -164,6 +167,7 @@ body {
   .decoupled {
     @include span-columns(4);
     @include omega;
+    padding-right: 1em;
   }
 }
 
