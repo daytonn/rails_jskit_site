@@ -36,6 +36,7 @@
         %li= link_to "Testing Actions", "#testing-actions"
         %li= link_to "Testing Elements", "#testing-elements"
         %li= link_to "Testing Events", "#testing-events"
+        %li= link_to "Chai-JSkit", "#testing-libraries"
 
 .content
   %h2#dependencies Dependencies
@@ -115,42 +116,6 @@
   %p Now all your controllers will be loaded at runtime but nothing will execute until events are dispatched.
 
   %h2#getting-started Documentation
-
-  %h3#application-object Application Object
-
-  %p RailsJskit will automatically create a JSkit application object for you, using the configured <code>app_namespace</code> for the global variable name <em>(defaults to "App")</em>. This global namespace provides you a way to interact with your JSkit application. You can #{link_to "configure", "#configuration"} this setting in your initializer <code>(config/initializers/rails_jskit.rb)</code>.
-
-  %h4#dispatcher Dispatcher
-
-  %p Every JSkit application has a <code>Dispatcher</code> object. This object is responsible for registering and triggering events in your application. In general you don't interact directly with the application's Dispatcher, though it's important to know what it is and what it's doing. By default, every controller created by your application will have it's own reference to the Dispatcher object. A controller's actions will automatically be registered on the Dispatcher when it's created, so you shouldn't need to interact with the Dispatcher directly.
-
-  %h4#controllers-object Controllers Object
-
-  %p Every JSkit application also has a <code>Controllers</code> object that stores the Controllers instantiated by your application at runtime. Everytime you create a controller, an instance is created on the controllers object:
-
-  :code
-    #lang: ruby
-
-    // app/assets/javascripts/controllers/posts_controller.js
-    App.createController("Posts", {
-      ...
-    });
-
-    App.Controllers.Posts;// Instantiated Posts controller object
-
-  %h4#controller-factories Controller Factories
-
-  %p In addition to instances of each controller, the factory used to create the controller is stored on the application object itself. The factory is a function that will create a freshly initialized controller, useful in testing environments:
-
-  :code
-    #lang: ruby
-
-    // app/assets/javascripts/controllers/posts_controller.js
-    App.createController("Posts", {
-      ...
-    });
-
-    App.PostsController;// Factory function to create fresh Posts controller objects
 
   %h3#controllers Controllers
 
@@ -395,7 +360,7 @@
 
   %p This keeps all the DOM selection one simple structure that cuts down on the clutter.
 
-  %p.note <em>Note: all keys under each action will be set as variables prefixed with the <code>$</code> to indicate that it's a <code>jQuery</code> wrapped set.</em> The above example would create three variables on the controller object when the <code>index</code> action is triggered:
+  %p.note <em>Note: all keys under each action will be set as variables prefixed with the <code>$</code> to indicate that it's a <code>jQuery</code> wrapped set.</em> The above example would create four variables on the controller object when the <code>index</code> action is triggered:
 
   :code
     #lang: js
@@ -495,6 +460,42 @@
     // app/assets/javascripts/controllers/application_controller.js
     MyApp.createController("Posts", {...});
 
+  %h3#application-object Application Object
+
+  %p RailsJskit will automatically create a JSkit application object for you, using the configured <code>app_namespace</code> for the global variable name. This global namespace provides you a way to interact with your JSkit application. You can #{link_to "configure", "#configuration"} this setting in your initializer <code>(config/initializers/rails_jskit.rb)</code>.
+
+  %h4#dispatcher Dispatcher
+
+  %p Every JSkit application has a <code>Dispatcher</code> object. This object is responsible for registering and triggering events in your application. In general you don't interact directly with the application's Dispatcher, though it's important to know what it is and what it's doing. By default, every controller created by your application will have it's own reference to the Dispatcher object. A controller's actions will automatically be registered on the Dispatcher when it's created, so you shouldn't need to interact with the Dispatcher directly.
+
+  %h4#controllers-object Controllers Object
+
+  %p Every JSkit application also has a <code>Controllers</code> object that stores the Controllers instantiated by your application at runtime. Everytime you create a controller, an instance is created on the controllers object:
+
+  :code
+    #lang: ruby
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      ...
+    });
+
+    App.Controllers.Posts;// Instantiated Posts controller object
+
+  %h4#controller-factories Controller Factories
+
+  %p In addition to instances of each controller, the factory used to create the controller is stored on the application object itself. The factory is a function that will create a freshly initialized controller, useful in testing environments:
+
+  :code
+    #lang: ruby
+
+    // app/assets/javascripts/controllers/posts_controller.js
+    App.createController("Posts", {
+      ...
+    });
+
+    App.PostsController;// Factory function to create fresh Posts controller objects
+
   %h2#testing Testing
 
   %p One of the main advantages of RailsJSkit is that it provides a simple structure that's easily tested. There are however, a few things you need to keep in mind while testing JSkit controllers.
@@ -568,7 +569,7 @@
 
   %h3#testing-elements Testing Elements
 
-  %p While you don't have to test the functionality of JSkit itself, you may want to assert that a certain action has access to a given element. To do this we can simply test the values in the elements object, without having to add fixtures to the test DOM:
+  %p While you don't have to test the functionality of JSkit itself, you may want to assert that a certain action has access to a given element. To do this we can simply test the values in the elements object, without having to add fixtures to the test DOM (we can trust that JSkit caches the elements properly):
 
   :code
     #lang: js
@@ -589,9 +590,13 @@
       });
     });
 
+  %p When testing other methods of your controller, most times your code will depend on the elements being cached. While you could accomplish this by triggering the event that activates the action, it relies on a side effect: `subject.dispatcher.trigger(subject.actionEventName("index"))` or `subject.dispatcher.trigger("controller:posts:index")`
+
+  %p JSkit exposes the element cacheing method for this very purpose which allows your tests to be more declarative and clear:
+
   %h3#testing-events Testing Events
 
-  %p Testing events is just as easy as testing elements, since they have a similar object:
+  %p Testing events is just as easy as testing elements:
 
   :code
     #lang: js
@@ -600,15 +605,9 @@
     App.createController("Posts", {
       elements: {
         index: {
-          expandCommentsButton: "#expand-comments"
-        }
-      },
-
-      events: {
-        index: {
-          expandCommentsButton: {
+          expandCommentsButton: ["#expand-comments", {
             click: "handleExpandCommentsClick"
-          }
+          }]
         }
       },
 
@@ -616,6 +615,7 @@
         ...
       }
     });
+
   :code
     #lang: js
 
@@ -629,8 +629,14 @@
       describe("#index", function() {
         describe("events", function() {
           it("wires up `handleExpandCommentsClick` on click of the $expandCommentsButton", function() {
-            expect(subject.events.index.expandCommentsButton.click).to.equal("handleExpandCommentsClick");
+            expect(subject.events.index.expandCommentsButton[1].click).to.equal("handleExpandCommentsClick");
           });
         });
       });
     });
+
+
+
+  %h3#testing-libraries Chai-JSkit
+
+  %p While the examples above show how simple it is to test events and elements on JSkit controllers, there is a bit of tedium involved with accessing the properties of a given action's elements and events. There is a library for chai that makes this easier to use: #{link_to "chai-jskit", "https://github.com/daytonn/chai-jskit"}.
